@@ -125,7 +125,7 @@ npx tailwindcss init
     ```bash
     python app.py
     ```
-    The backend should now be running at [http://localhost:5000](http://localhost:5000).
+    The backend should now be running at [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
 ### Frontend Setup (React)
 1. **Navigate to the frontend directory**:

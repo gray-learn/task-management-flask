@@ -1,9 +1,9 @@
 ### Get all tasks
-GET http://localhost:5000/api/tasks
+GET http://127.0.0.1:5000/api/tasks
 Accept: application/json
 
 ### Create a new task
-POST http://localhost:5000/api/tasks
+POST http://127.0.0.1:5000/api/tasks
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 }
 
 ### Update an existing task (replace <task_id> with the actual ID)
-PUT http://localhost:5000/api/tasks/<task_id>
+PUT http://127.0.0.1:5000/api/tasks/<task_id>
 Content-Type: application/json
 
 {
@@ -22,4 +22,4 @@ Content-Type: application/json
 }
 
 ### Delete a task (replace <task_id> with the actual ID)
-DELETE http://localhost:5000/api/tasks/<task_id>
+DELETE http://127.0.0.1:5000/api/tasks/<task_id>
