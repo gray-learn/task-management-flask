@@ -1,0 +1,25 @@
+### Get all tasks
+GET http://localhost:5000/api/tasks
+Accept: application/json
+
+### Create a new task
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+
+{
+    "title": "New Task",
+    "description": "This is a new task."
+}
+
+### Update an existing task (replace <task_id> with the actual ID)
+PUT http://localhost:5000/api/tasks/<task_id>
+Content-Type: application/json
+
+{
+    "title": "Updated Task Title",
+    "description": "Updated description.",
+    "completed": true
+}
+
+### Delete a task (replace <task_id> with the actual ID)
+DELETE http://localhost:5000/api/tasks/<task_id>
