@@ -14,6 +14,7 @@ export const getTasks = async () => {
 
 export const addTask = async (task) => {
   try {
+    // task.preventDefault() // to prevent the form from reloading the page when it's submitted.
     const response = await axios.post(API_URL, task);
     return response.data;
   } catch (error) {
