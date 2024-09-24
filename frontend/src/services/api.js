@@ -45,3 +45,13 @@ export const updateTask = async (id, task) => {
     throw error; // Rethrow the error for further handling
   }
 };
+
+export const updateTasks = async (taskId, task) => {
+  try {
+    const response = await axios.put(`${API_URL}/update/${taskId}`, task);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error; // Rethrow the error for further handling
+  }
+};

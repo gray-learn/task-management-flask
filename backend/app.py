@@ -14,7 +14,7 @@ class Task(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     completed = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     def to_dict(self):
         return {
@@ -49,7 +49,7 @@ def create_task():
         data = request.json
         if not data or 'title' not in data:
             return jsonify({"error": "Title is required"}), 400
-        
+        # print(data)
         new_task = Task(
             title=data['title'],
             description=data.get('description', ''),
@@ -58,7 +58,9 @@ def create_task():
         db.session.commit()
         return jsonify(new_task.to_dict()), 201
     except Exception as e:
+        print(e)  # Log the exception for debugging
         return jsonify({"error": "An error occurred while creating the task."}), 500
+
 
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
@@ -89,6 +91,29 @@ def delete_task(task_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "An error occurred while deleting the task."}), 500
+
+@app.route('/api/tasks/update/<int:task_id>', methods=['PUT'])
+def update_tasks(task_id):
+    try:
+        data = request.json  # Get the data from the request body
+
+        # Find the task by its ID
+        task = Task.query.get(task_id)
+        if not task:
+            return jsonify({"error": "Task not found"}), 404
+
+        # Update the task's attributes
+        if 'title' in data:
+            task.title = data['title']
+        if 'description' in data:
+            task.description = data.get('description', task.description)
+
+        db.session.commit()  # Save changes to the database
+
+        return jsonify(task.to_dict()), 200
+    except Exception as e:
+        print(e)  # Log the exception for debugging
+        return jsonify({"error": "An error occurred while updating the task."}), 500
 
 if __name__ == '__main__':
     with app.app_context():

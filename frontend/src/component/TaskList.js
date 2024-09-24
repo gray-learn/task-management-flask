@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTasks, addTask, deleteTask, updateTask } from '../services/api'
+import { getTasks, addTask, deleteTask, updateTask,updateTasks } from '../services/api'
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IoPencil } from "react-icons/io5";
 import { TiTick } from "react-icons/ti";
@@ -10,8 +10,10 @@ function TaskList () {
     const [description, setDescription] = useState(''); // State to store task description
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [search, setSearch] = useState("");
+    const [isEditing, setIsEditing] = useState(false); // To track if we are editing an existing task
+    const [currentTaskId, setCurrentTaskId] = useState(null); // Store the current task ID for updates
 
-      // Function to format the date in mm/dd/yyyy
+    // Function to format the date in mm/dd/yyyy
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString('en-US');
     };
@@ -45,13 +47,13 @@ function TaskList () {
 
     // Function to handle adding a new task
     const handleAddTask = async () => {
-
         if (title.trim()) {
             try {
                 await addTask({ title, description }); // Add a new task via API
                 fetchTasks(); // Refresh the task list
                 setTitle(''); // Clear the title input
                 setDescription(''); // Clear the description input
+                setIsEditing(false); // Reset editing mode
                 setIsModalOpen(false); // Close the modal after submitting
             } catch (error) {
                 console.error("Failed to add task", error); // Handle any errors
@@ -65,7 +67,30 @@ function TaskList () {
         setCurrentTaskId(task.id); // Set the ID of the task being edited
         setTitle(task.title); // Pre-populate the title
         setDescription(task.description); // Pre-populate the description
-      };
+    };
+
+    // Handle task update
+  const handleUpdateTask = async () => {
+    try {
+      const updatedTask = { title, description };
+      await updateTasks(currentTaskId, updatedTask); // Send the PUT request to update the task
+
+      // Update the local state with the updated task
+      setTasks(tasks.map((task) =>
+        task.id === currentTaskId ? { ...task, title, description } : task
+      ));
+
+      // Close the modal and reset state
+      setIsModalOpen(false);
+      setIsEditing(false);
+      setTitle('');
+      setDescription('');
+      setCurrentTaskId(null);
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    }
+  };
+
 
     // Function to delete a task
     const handleDeleteTask = async (id) => {
@@ -163,7 +188,7 @@ function TaskList () {
                                     </>}
                                 </td>
                                 <td className="p-3">
-                                    <button className="text-blue-500 mr-4" onClick={()=>handleEditTask(task)}
+                                    <button className="text-blue-500 mr-4" onClick={()=>handleEditTask(task)}>
                                         <IoPencil/>
                                     </button>
                                     <button className="text-red-500" onClick={() => handleDeleteTask(task.id)}>
@@ -173,59 +198,27 @@ function TaskList () {
                             </tr>
                             ))}
                     </tbody>                
-                    <tbody>
-                        {tasks.map((task) => (
-                            <tr key={task.id} className="text-center">
-                                <td className="py-2 px-4 border">
-                                    <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
-                                        {task.title}
-                                    </span>
-                                </td>
-                                <td className="py-2 px-4 border">{task.description}</td>
-                                <td className="py-2 px-4 border">
-                                     {task.completed ? 'Completed' : 'Pending'}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    <button
-                                        onClick={() => handleToggleComplete(task.id)}
-                                        className={`px-4 py-2 text-white rounded ${
-                                            task.completed ? 'bg-red-500' : 'bg-green-500'
-                                        }`}
-                                    >
-                                    {task.completed ? 'Mark Incomplete' : 'Mark Complete'}
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteTask(task.id)}
-                                        className={`ml-2 px-4 py-2 text-white rounded ${
-                                            task.completed ? 'bg-red-500' : 'bg-gray-500'
-                                        }`}
-                                        disabled={!task.completed} // Disable the button if the task is incomplete
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
                 </table>
                 {/* Modal for Adding New Task */}
                     {isModalOpen && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                         <div className="bg-white p-6 rounded shadow-lg w-1/3">
-                            <h2 className="text-2xl mb-4">Add New Task</h2>
+                            <h2 className="text-2xl mb-4 text-black">
+                                {isEditing ? 'Edit Task' : 'Add New Task'}    
+                            </h2>
                             <input
                                 type="text"
                                 placeholder="Task Name"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                className="border p-2 mb-4 w-full"
+                                className="border p-2 mb-4 w-full text-black"
                             />
                             <input
                                 type="text"
                                 placeholder="Task Description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="border p-2 mb-4 w-full"
+                                className="border p-2 mb-4 w-full text-black"
                             />
                             <div className="flex justify-end">
                             <button
@@ -235,10 +228,10 @@ function TaskList () {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleAddTask}
+                                onClick={isEditing ? handleUpdateTask   : handleAddTask} // Conditional for Add or Edit
                                 className="px-4 py-2 bg-green-500 text-white rounded"
                             >
-                                Confirm
+                                {isEditing ? 'Update' : 'Confirm'}
                             </button>
                             </div>
                         </div>
